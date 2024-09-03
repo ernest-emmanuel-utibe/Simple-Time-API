@@ -1,0 +1,89 @@
+# name: Deploy API to GKE
+
+# on:
+#   push:
+#     branches:
+#     - main
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#     - name: Checkout code
+#       uses: actions/checkout@v3
+
+#     - name: Set up Google Cloud SDK
+#       uses: google-github-actions/setup-gcloud@v1
+#       with:
+#         version: 'latest'
+#         service_account_key: ${{ secrets.GCP_SA_KEY }}
+#         export_default_credentials: true
+
+#     - name: Configure Docker for GCR
+#       run: |
+#         gcloud auth configure-docker
+
+#     - name: Build Docker image
+#       run: |
+#         docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/simple-time-api:latest .
+
+#     - name: Push Docker image to Google Container Registry
+#       run: |
+#         docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/simple-time-api:latest
+
+#     - name: Set up Terraform
+#       uses: hashicorp/setup-terraform@v2
+#       with:
+#         cli_config_credentials_token: ${{ secrets.TF_CLI_CONFIG }}
+
+#     - name: Initialize Terraform
+#       run: terraform init
+
+#     - name: Terraform Plan
+#       run: terraform plan
+
+#     - name: Terraform Apply
+#       run: terraform apply -auto-approve
+
+#     - name: Test API Endpoint
+#       run: |
+#         sleep 30 # Wait for the LoadBalancer to be ready
+#         API_URL=$(kubectl get svc simple-time-api -n simple-api-namespace -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+#         curl http://$API_URL
+
+
+
+
+name: Deploy API to GKE
+
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        export_default_credentials: true
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v1
+
+    - name: Initialize Terraform
+      run: terraform init
+
+    - name: Apply Terraform
+      run: terraform apply -auto-approve
+
+    - name: Verify Deployment
+      run: curl $(terraform output -raw load_balancer_ip)

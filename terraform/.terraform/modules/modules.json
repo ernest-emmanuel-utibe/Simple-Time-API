@@ -1,0 +1,1 @@
+{"Modules":[{"Key":"","Source":"","Dir":"."},{"Key":"gke","Source":"./gke","Dir":"gke"},{"Key":"kubernetes","Source":"./kubernetes","Dir":"kubernetes"},{"Key":"nat_gateway","Source":"./nat_gateway","Dir":"nat_gateway"},{"Key":"vpc","Source":"./vpc","Dir":"vpc"}]}
